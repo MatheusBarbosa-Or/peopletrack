@@ -1,0 +1,75 @@
+.card {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  transition: 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.backgroundIcon {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 64px;
+  opacity: 0.08;
+  color: var(--color-primary);
+  font-variation-settings: "FILL" 1;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-muted);
+  margin-bottom: 16px;
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.content {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.content strong {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.primary {
+  color: var(--color-primary);
+}
+
+.success {
+  color: var(--color-success);
+}
+
+.danger {
+  color: var(--color-danger);
+}
+
+.trend {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+.card p {
+  margin: 10px 0 0;
+  color: var(--color-muted);
+  font-size: 12px;
+}
