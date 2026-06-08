@@ -30,6 +30,22 @@ body {
   min-height: 100%;
 }
 
+html.dark-theme {
+  --color-primary: #b0c6ff;
+  --color-primary-light: #d9e2ff;
+  --color-background: #111418;
+  --color-surface: #191c1e;
+  --color-surface-soft: #24282c;
+  --color-border: #353a40;
+  --color-text: #f7f9fb;
+  --color-muted: #a8b0ba;
+  --color-success: #10b981;
+  --color-success-bg: #063d2b;
+  --color-success-text: #a7f3d0;
+  --color-danger: #ffb4ab;
+  --color-danger-bg: #4f1515;
+}
+
 body {
   background: var(--color-background);
   color: var(--color-text);

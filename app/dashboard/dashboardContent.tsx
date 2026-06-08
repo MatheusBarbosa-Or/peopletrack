@@ -52,10 +52,6 @@ export function DashboardContent() {
     };
   }, [funcionarios]);
 
-  const funcionariosAtivos = funcionarios.filter(
-    (funcionario) => funcionario.status === "ativo"
-  );
-
   return (
     <main className={styles.main}>
       <section className={styles.heading}>
@@ -96,7 +92,7 @@ export function DashboardContent() {
         />
       </section>
 
-      <EmployeeTable employees={funcionariosAtivos} />
+      <EmployeeTable employees={funcionarios} maxItems={10} />
     </main>
   );
 }

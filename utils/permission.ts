@@ -19,3 +19,11 @@ export function canViewTerminationReason(user: UsuarioLogado | null) {
     user?.role === "RH_MANAGER"
   );
 }
+
+export function canViewEmployeeCpf(user: UsuarioLogado | null) {
+  return (
+    user?.role === "ADMIN" ||
+    user?.role === "CEO" ||
+    user?.role === "RH_MANAGER"
+  );
+}

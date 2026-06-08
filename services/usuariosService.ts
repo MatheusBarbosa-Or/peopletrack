@@ -13,9 +13,8 @@ export type Usuario = {
 
 export type CreateUsuarioPayload = {
   username: string;
-  password: string;
   nome: string;
-  cpf: string | null;
+  cpf: string;
   cargo: string;
   role: string;
   is_active: boolean;

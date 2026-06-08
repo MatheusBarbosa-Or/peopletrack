@@ -33,11 +33,6 @@ export function Sidebar() {
           },
         ]
       : []),
-    {
-      label: "Configurações",
-      href: "/configuracoes",
-      icon: "settings",
-    },
   ];
 
   function isActiveRoute(href: string) {

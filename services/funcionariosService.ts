@@ -40,10 +40,21 @@ export type CreateFuncionarioPayload = {
   email: string | null;
   data_nascimento: string | null;
   genero: string | null;
-  cargo: string | null;
-  horario_trabalho: string | null;
+  cargo: string;
+  horario_entrada: string | null;
+  horario_saida: string | null;
   status: string;
-  presence_password: string | null;
+};
+
+export type UsuarioCriadoAutomaticamente = {
+  id: string;
+  username: string;
+  role: string;
+};
+
+export type CreateFuncionarioResult = {
+  funcionario: Funcionario;
+  usuario_criado: UsuarioCriadoAutomaticamente | null;
 };
 
 type CreateFuncionarioResponse = {
@@ -66,7 +77,7 @@ type DesligamentoResponse = {
 
 export async function createFuncionario(
   payload: CreateFuncionarioPayload
-): Promise<Funcionario> {
+): Promise<CreateFuncionarioResult> {
   const response = await fetch(`${API_URL}/funcionarios`, {
     method: "POST",
     headers: {
@@ -80,9 +91,12 @@ export async function createFuncionario(
     throw new Error(error?.detail ?? "Erro ao cadastrar funcionário");
   }
 
-  const data: CreateFuncionarioResponse = await response.json();
+  const data = await response.json();
 
-  return data.funcionario;
+  return {
+    funcionario: data.funcionario,
+    usuario_criado: data.usuario_criado ?? null,
+  };
 }
 
 export async function getFuncionarios(

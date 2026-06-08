@@ -12,14 +12,18 @@ import {
 import styles from "./funcionarios.module.css";
 
 type StatusFilter = "ativo" | "desligado" | "todos";
+type SortOrder = "az" | "za" | "recentes" | "antigos";
 
 export function FuncionariosContent() {
   const searchParams = useSearchParams();
-  const search = searchParams.get("search") ?? "";
+  const initialSearch = searchParams.get("search") ?? "";
 
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(
-    search ? "todos" : "ativo"
+    initialSearch ? "todos" : "ativo"
   );
+  const [sortOrder, setSortOrder] = useState<SortOrder>("az");
+
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -44,13 +48,13 @@ export function FuncionariosContent() {
   }, [statusFilter]);
 
   const filteredFuncionarios = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
+    const normalizedSearch = searchTerm.trim().toLowerCase();
 
-    if (!normalizedSearch) {
-      return funcionarios;
-    }
+    const filtered = funcionarios.filter((funcionario) => {
+      if (!normalizedSearch) {
+        return true;
+      }
 
-    return funcionarios.filter((funcionario) => {
       const searchableContent = [
         funcionario.nome,
         funcionario.cpf,
@@ -64,17 +68,43 @@ export function FuncionariosContent() {
 
       return searchableContent.includes(normalizedSearch);
     });
-  }, [funcionarios, search]);
+
+    return [...filtered].sort((a, b) => {
+      if (sortOrder === "az") {
+        return a.nome.localeCompare(b.nome, "pt-BR");
+      }
+
+      if (sortOrder === "za") {
+        return b.nome.localeCompare(a.nome, "pt-BR");
+      }
+
+      if (sortOrder === "recentes") {
+        return (
+          new Date(b.created_at ?? 0).getTime() -
+          new Date(a.created_at ?? 0).getTime()
+        );
+      }
+
+      if (sortOrder === "antigos") {
+        return (
+          new Date(a.created_at ?? 0).getTime() -
+          new Date(b.created_at ?? 0).getTime()
+        );
+      }
+
+      return 0;
+    });
+  }, [funcionarios, searchTerm, sortOrder]);
 
   return (
     <main className={styles.main}>
       <section className={styles.header}>
         <div>
-          <h2>{search ? "Resultados da Pesquisa" : "Funcionários"}</h2>
+          <h2>{searchTerm ? "Resultados da Pesquisa" : "Funcionários"}</h2>
 
           <p>
-            {search
-              ? `Mostrando ${filteredFuncionarios.length} resultado(s) para "${search}"`
+            {searchTerm
+              ? `Mostrando ${filteredFuncionarios.length} resultado(s) para "${searchTerm}"`
               : "Gerencie e visualize os funcionários registrados no sistema."}
           </p>
         </div>
@@ -91,11 +121,38 @@ export function FuncionariosContent() {
             <option value="todos">Todos</option>
           </select>
 
-          <button type="button">
-            <span className="material-symbols-outlined">sort</span>
-            Ordenar
-          </button>
+          <select
+            value={sortOrder}
+            onChange={(event) => setSortOrder(event.target.value as SortOrder)}
+          >
+            <option value="az">Nome A-Z</option>
+            <option value="za">Nome Z-A</option>
+            <option value="recentes">Mais recentes</option>
+            <option value="antigos">Mais antigos</option>
+          </select>
         </div>
+      </section>
+
+      <section className={styles.searchSection}>
+        <div className={styles.searchBox}>
+          <span className="material-symbols-outlined">search</span>
+
+          <input
+            placeholder="Buscar por nome, CPF, e-mail ou cargo..."
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+        </div>
+
+        {searchTerm && (
+          <button
+            type="button"
+            className={styles.clearSearchButton}
+            onClick={() => setSearchTerm("")}
+          >
+            Limpar busca
+          </button>
+        )}
       </section>
 
       {isLoading && (

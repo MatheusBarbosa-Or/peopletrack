@@ -1,12 +1,17 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
+
 import styles from "./EmployeeTable.module.css";
 import type { Funcionario } from "../../services/funcionariosService";
 
 type EmployeeTableProps = {
   employees: Funcionario[];
+  maxItems?: number;
 };
+
+type StatusFilter = "todos" | "ativo" | "desligado" | "afastado" | "ferias";
 
 function getInitials(name: string) {
   return name
@@ -34,7 +39,43 @@ function formatDate(date: string | null) {
   return new Intl.DateTimeFormat("pt-BR").format(new Date(date));
 }
 
-export function EmployeeTable({ employees }: EmployeeTableProps) {
+export function EmployeeTable({ employees, maxItems = 10 }: EmployeeTableProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ativo");
+
+  const filteredEmployees = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+
+    return employees
+      .filter((employee) => {
+        if (statusFilter === "todos") {
+          return true;
+        }
+
+        return employee.status === statusFilter;
+      })
+      .filter((employee) => {
+        if (!normalizedSearch) {
+          return true;
+        }
+
+        const searchableContent = [
+          employee.nome,
+          employee.cpf,
+          employee.email,
+          employee.cargo,
+          employee.status,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchableContent.includes(normalizedSearch);
+      });
+  }, [employees, searchTerm, statusFilter]);
+
+  const visibleEmployees = filteredEmployees.slice(0, maxItems);
+
   return (
     <section className={styles.wrapper}>
       <div className={styles.header}>
@@ -46,13 +87,27 @@ export function EmployeeTable({ employees }: EmployeeTableProps) {
         <div className={styles.tools}>
           <div className={styles.search}>
             <span className="material-symbols-outlined">search</span>
-            <input placeholder="Buscar por nome ou cargo..." />
+
+            <input
+              placeholder="Buscar por nome, CPF ou cargo..."
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
           </div>
 
-          <button type="button" className={styles.filterButton}>
-            <span className="material-symbols-outlined">filter_list</span>
-            Filtros
-          </button>
+          <select
+            className={styles.filterSelect}
+            value={statusFilter}
+            onChange={(event) =>
+              setStatusFilter(event.target.value as StatusFilter)
+            }
+          >
+            <option value="ativo">Ativos</option>
+            <option value="desligado">Desligados</option>
+            <option value="afastado">Afastados</option>
+            <option value="ferias">Férias</option>
+            <option value="todos">Todos</option>
+          </select>
         </div>
       </div>
 
@@ -69,14 +124,14 @@ export function EmployeeTable({ employees }: EmployeeTableProps) {
           </thead>
 
           <tbody>
-            {employees.length === 0 ? (
+            {visibleEmployees.length === 0 ? (
               <tr>
                 <td colSpan={5} className={styles.emptyCell}>
                   Nenhum funcionário encontrado.
                 </td>
               </tr>
             ) : (
-              employees.map((employee) => (
+              visibleEmployees.map((employee) => (
                 <tr key={employee.id}>
                   <td>
                     <div className={styles.employeeCell}>
@@ -117,6 +172,13 @@ export function EmployeeTable({ employees }: EmployeeTableProps) {
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className={styles.footer}>
+        <span>
+          Mostrando {visibleEmployees.length} de {filteredEmployees.length}{" "}
+          resultado(s)
+        </span>
       </div>
     </section>
   );

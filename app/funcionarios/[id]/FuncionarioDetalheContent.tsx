@@ -4,9 +4,11 @@ import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import {
+  Desligamento,
   DesligamentoPayload,
   Funcionario,
   desligarFuncionario,
+  getDesligamentoFuncionario,
   getFuncionarioById,
 } from "../../../services/funcionariosService";
 
@@ -20,6 +22,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import {
   canTerminateEmployee,
   canViewTerminationReason,
+  canViewEmployeeCpf,
 } from "@/utils/permission";
 
 import styles from "./funcionarioDetalhe.module.css";
@@ -96,6 +99,8 @@ export function FuncionarioDetalheContent({
   const [comentario, setComentario] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState("");
 
+  const [desligamento, setDesligamento] = useState<Desligamento | null>(null);
+
   const [isTerminationModalOpen, setIsTerminationModalOpen] = useState(false);
   const [terminationReason, setTerminationReason] =
     useState<DesligamentoPayload["reason_type"]>("baixo_desempenho");
@@ -111,18 +116,23 @@ export function FuncionarioDetalheContent({
   const allowTerminate = canTerminateEmployee(user);
   const allowViewTerminationReason = canViewTerminationReason(user);
 
+  const allowViewCpf = canViewEmployeeCpf(user);
+
   async function loadData() {
     try {
       setIsLoading(true);
       setErrorMessage("");
 
-      const [funcionarioData, relatoriosData] = await Promise.all([
-        getFuncionarioById(funcionarioId),
-        getRelatoriosByFuncionario(funcionarioId),
-      ]);
+      const [funcionarioData, relatoriosData, desligamentoData] =
+        await Promise.all([
+          getFuncionarioById(funcionarioId),
+          getRelatoriosByFuncionario(funcionarioId),
+          getDesligamentoFuncionario(funcionarioId),
+        ]);
 
       setFuncionario(funcionarioData);
       setRelatorios(relatoriosData);
+      setDesligamento(desligamentoData);
     } catch (error) {
       setErrorMessage("Não foi possível carregar a ficha do funcionário.");
     } finally {
@@ -183,7 +193,10 @@ export function FuncionarioDetalheContent({
       setFeedbackMessage("Funcionário desligado com sucesso.");
 
       const updatedFuncionario = await getFuncionarioById(funcionarioId);
+      const updatedDesligamento = await getDesligamentoFuncionario(funcionarioId);
+
       setFuncionario(updatedFuncionario);
+      setDesligamento(updatedDesligamento);
     } catch (error) {
       setFeedbackMessage("Erro ao desligar funcionário.");
     }
@@ -203,6 +216,29 @@ export function FuncionarioDetalheContent({
         <div className={styles.errorBox}>{errorMessage}</div>
       </main>
     );
+  }
+
+  function maskCpf(cpf: string) {
+    const digits = cpf.replace(/\D/g, "");
+
+    if (digits.length !== 11) {
+      return "CPF oculto";
+    }
+
+    return `${digits.slice(0, 3)}.***.***-${digits.slice(9, 11)}`;
+  }
+
+  function formatTerminationReason(reason: string) {
+    const labels: Record<string, string> = {
+      pedido_do_funcionario: "Pedido do funcionário",
+      baixo_desempenho: "Baixo desempenho",
+      quebra_de_conduta: "Quebra de conduta",
+      fim_de_contrato: "Fim de contrato",
+      reestruturacao: "Reestruturação",
+      outro: "Outro",
+    };
+
+    return labels[reason] ?? reason;
   }
 
   return (
@@ -260,7 +296,9 @@ export function FuncionarioDetalheContent({
 
               <div>
                 <span>CPF</span>
-                <strong>{funcionario.cpf}</strong>
+                <strong>
+                  {allowViewCpf ? funcionario.cpf : maskCpf(funcionario.cpf)}
+                </strong>
               </div>
 
               <div>
@@ -357,6 +395,34 @@ export function FuncionarioDetalheContent({
               </div>
             )}
           </div>
+
+          {allowViewTerminationReason &&
+            funcionario.status === "desligado" &&
+            desligamento && (
+              <div className={styles.terminationCard}>
+                <h4>
+                  <span className="material-symbols-outlined">assignment_late</span>
+                  Registro de Desligamento
+                </h4>
+
+                <div className={styles.terminationGrid}>
+                  <div>
+                    <span>Motivo</span>
+                    <strong>{formatTerminationReason(desligamento.reason_type)}</strong>
+                  </div>
+
+                  <div>
+                    <span>Data do desligamento</span>
+                    <strong>{formatDate(desligamento.terminated_at)}</strong>
+                  </div>
+
+                  <div className={styles.fullWidthInfo}>
+                    <span>Descrição</span>
+                    <p>{desligamento.description}</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
           <div className={styles.dangerCard}>
             <div>

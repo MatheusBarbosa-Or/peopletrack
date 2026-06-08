@@ -170,6 +170,36 @@
   color: var(--color-muted);
 }
 
+.filterSelect {
+  height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-background);
+  color: var(--color-text);
+  padding: 0 12px;
+  font-weight: 700;
+  outline: none;
+}
+
+.filterSelect:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 60, 144, 0.12);
+}
+
+.emptyCell {
+  text-align: center;
+  padding: 32px;
+  color: var(--color-muted);
+}
+
+.footer {
+  padding: 14px 24px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
 @media (max-width: 768px) {
   .header {
     align-items: stretch;

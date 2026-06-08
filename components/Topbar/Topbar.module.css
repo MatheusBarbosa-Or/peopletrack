@@ -13,28 +13,8 @@
   z-index: 10;
 }
 
-.searchBox {
-  width: 100%;
-  max-width: 420px;
-  background: var(--color-surface-soft);
-  border-radius: 999px;
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.searchBox span {
-  color: var(--color-muted);
-}
-
-.searchBox input {
-  border: none;
-  background: transparent;
-  outline: none;
-  width: 100%;
-  color: var(--color-text);
-  font-size: 14px;
+.spacer {
+  flex: 1;
 }
 
 .actions {
@@ -81,9 +61,5 @@
   .topbar {
     left: 0;
     padding: 0 16px;
-  }
-
-  .actions {
-    display: none;
   }
 }
